@@ -1,0 +1,42 @@
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+      types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'adopt'
+
+    - name: Make Gradlew executable
+      working-directory: classroom
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      working-directory: classroom
+      run: ./gradlew build
+
+    - name: Run Tests
+      working-directory: classroom
+      run: ./gradlew test
+
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@v3.0.0 
+      with:
+        projectBaseDir: '.'
+      env:
+        SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+            
